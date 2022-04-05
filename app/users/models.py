@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
 from django.db import models
@@ -12,6 +13,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
 
+    birthday = models.DateField(null=True, blank=True)
+
     objects = UserManager()
 
     unique_fields = (email, )
@@ -25,6 +28,22 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def get_full_name(self):
         return f'{self.name} {self.last_name}'
+
+    @property
+    def age(self):
+        """Get the model's age
+
+        Returns:
+            int: User's age
+        """
+        now = datetime.now()
+        age = None
+
+        if (self.birthday):
+            birth = datetime(year=self.birthday.year, month=self.birthday.month, day=self.birthday.day)
+            age = (now - birth).days // 365
+
+        return age
 
     def __str__(self):
         return self.email
